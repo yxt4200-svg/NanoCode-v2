@@ -16,6 +16,7 @@ class TodoLedger:
         return self.runtime.session.setdefault("todos", {"next_id": 1, "items": []})
 
     def add(self, content, status="pending", priority="normal", note=""):
+        """添加一个待办事项"""
         status = _clean_status(status)
         priority = _clean_priority(priority)
         todo_id = f"todo_{int(self.state.get('next_id', 1))}"
@@ -30,10 +31,11 @@ class TodoLedger:
             "updated_at": now(),
         }
         self.state.setdefault("items", []).append(item)
-        self._record_change("add", item)
+        self._record_change("add", item)  # 记录添加操作
         return item
 
     def update(self, todo_id, **changes):
+        """更新一个待办事项"""
         item = self.get(todo_id)
         for key in ("content", "note"):
             if key in changes and changes[key] is not None:
@@ -43,7 +45,7 @@ class TodoLedger:
         if changes.get("priority") is not None:
             item["priority"] = _clean_priority(changes["priority"])
         item["updated_at"] = now()
-        self._record_change("update", item)
+        self._record_change("update", item)  # 记录更新操作
         return item
 
     def get(self, todo_id):
@@ -69,11 +71,15 @@ class TodoLedger:
         return {"next_id": int(self.state.get("next_id", 1)), "items": [dict(item) for item in self.state.get("items", [])]}
 
     def _record_change(self, action, item):
+        """待办事项变更记录机制"""
         payload = {"action": action, "todo": dict(item)}
+        # 1. 记录到当前 TaskState（用于 run report）
         task_state = getattr(self.runtime, "current_task_state", None)
         if task_state is not None:
             task_state.todo_changes.append(payload)
+        # 2. 发送事件（用于 UI 更新、日志等）
         self.runtime.session_event_bus.emit("todo_changed", payload)
+        # 3. 持久化到 session（会话级持久化）
         self.runtime.session_path = self.runtime.session_store.save(self.runtime.session)
 
 

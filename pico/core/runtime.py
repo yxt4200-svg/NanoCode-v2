@@ -861,6 +861,7 @@ class Pico(RuntimeSecretsMixin, RuntimeCheckpointsMixin):
             "artifact_graph": dict(task_state.artifact_graph),
             "verifier_suggestions": list(task_state.verifier_suggestions),
             "runtime_reminders": list(task_state.runtime_reminders),
+            # 待办事项变更记录进入 Run Report
             "todos": self.todo_ledger.to_dict(),
             "todo_changes": list(task_state.todo_changes),
             "workers": self.worker_manager.to_dict(),

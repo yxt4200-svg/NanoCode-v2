@@ -107,6 +107,7 @@ class ContextManager:
             "history": "",
             CURRENT_REQUEST_SECTION: f"Current user request:\n{user_message}",
         }
+        # 添加待办事项到 memory 中
         if hasattr(self.agent, "todo_ledger"):
             section_texts["memory"] += "\n\n" + self.agent.todo_ledger.render_prompt()
         checkpoint_text = ""
