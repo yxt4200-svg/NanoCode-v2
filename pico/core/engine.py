@@ -355,6 +355,7 @@ class Engine:
 
             final = (payload or raw).strip()
             yield from self._drain_worker_notification_events()   # 时机2：处理模型输出，final 响应之前，再次检查是否有通知需要处理，确保用户能及时看到这些通知
+            # Plan 模式下，如果模型试图直接返回 final answer，但 plan_mode 认为还不能 finish，就发出一个 notice，提示模型先把计划写出来。
             if agent.runtime_mode == "plan" and not agent.plan_mode.can_finish():
                 notice = agent.plan_mode.final_notice()
                 agent.record(
@@ -374,7 +375,7 @@ class Engine:
                     "run_id": task_state.run_id,
                     "content": notice,
                 }
-                continue
+                continue  # 不允许模型直接返回 final answer，继续循环，让模型有机会修正输出
 
             agent.record({"role": "assistant", "content": final, "created_at": now()})
             if agent.runtime_mode == "plan":

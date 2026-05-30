@@ -31,11 +31,11 @@ class PlanModeManager:
             "topic": str(topic or ""),
             "plan_path": plan_path,
         }
-        self.runtime.set_tool_profile("plan")
+        self.runtime.set_tool_profile("plan")  # 切换到 plan 模式，启用 plan 相关的工具
         self.runtime.session_path = self.runtime.session_store.save(
             self.runtime.session
         )
-        self.runtime.refresh_prefix(force=True)
+        self.runtime.refresh_prefix(force=True)  # 刷新会话前缀，确保用户能及时看到 plan 相关的通知
         self.runtime.session_event_bus.emit(
             "runtime_mode_changed",
             {"mode": "plan", "plan_path": plan_path, "topic": str(topic or "")},
@@ -63,6 +63,7 @@ class PlanModeManager:
         if self.mode != "plan":
             return True
         path = self.runtime.path(self.plan_path)
+        # 检查计划路径是否存在且非空
         return path.is_file() and bool(path.read_text(encoding="utf-8").strip())
 
     def final_notice(self):

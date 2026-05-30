@@ -62,14 +62,18 @@ class PermissionChecker:
             return PermissionDecision.allow("approval_prompt")
         return PermissionDecision.deny("approval_denied", "approval_denied")
 
-
     def _check_plan(self, tool, args):
+        """检查 plan 模式下的工具权限"""
+        # 1. 只读工具直接允许
         if tool.read_only:
             return PermissionDecision.allow("plan_read_only")
+        # 2. 检查 write_file/patch_file 工具是否在允许范围内
         if tool.name not in {"write_file", "patch_file"}:
             return PermissionDecision.deny("plan_mode_tool_not_allowed", "plan_mode_write_guard")
         requested = self.runtime.path(args.get("path", ""))
+        # 3. 检查请求路径是否与当前活动计划路径匹配
         active = self.runtime.path(self.runtime.plan_mode.plan_path)
+        # 4. 路径不匹配，拒绝访问；匹配则允许写入
         if Path(requested) != Path(active):
             return PermissionDecision.deny("plan_mode_path_mismatch", "plan_mode_write_guard")
         return PermissionDecision.allow("plan_artifact_write")

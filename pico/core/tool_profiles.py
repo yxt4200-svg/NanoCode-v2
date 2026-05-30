@@ -27,17 +27,16 @@ def build_tool_profiles(tools):
     )
 
     # 计划模式工具：只读工具加上部分协调工具和模式工具
-    plan_tools = read_only | frozenset(
-        {
-            "write_file",
-            "patch_file",
-            "agent",
-            "send_message",
-            "task_stop",
-            "ask_user",
-            "exit_plan_mode",
-        }
-    )
+    plan_tools = read_only | frozenset({
+        "write_file",      # 允许写文件（但受路径限制）
+        "patch_file",      # 允许补丁文件（但受路径限制）
+        "agent",           # 允许启动子代理（但只允许 Explore）
+        "send_message",    # 允许发送消息
+        "task_stop",       # 允许停止任务
+        "ask_user",        # 允许询问用户
+        "exit_plan_mode",  # 允许退出计划模式
+})
+
     # 梦想模式工具：只读工具加上写入协调工具和模式工具
     dream_tools = read_only | frozenset({"write_file", "patch_file"})
     # 工作模式工具：所有工具减去协调工具、模式工具、交互工具和 run_shell 工具
