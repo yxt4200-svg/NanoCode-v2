@@ -4,6 +4,8 @@ from xml.sax.saxutils import escape
 
 
 def render_worker_notification(item):
+    """渲染工作线程的通知消息，包含任务ID、状态、描述、结果和使用情况等信息，格式化为XML字符串
+    """
     result = str(item.get("result", ""))
     parts = [
         "<task-notification>",

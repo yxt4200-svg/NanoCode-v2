@@ -36,9 +36,13 @@ class Engine:
         return final_answer
 
     def drain_worker_notifications(self):
+        """
+        Drain Notifications: 从工作线程管理器中获取所有通知并记录到会话中
+        """
         agent = self.runtime
         notifications = agent.worker_manager.drain_notifications()
         for notification in notifications:
+            # 关键：作为 user role 记录进主 history，确保用户能看到这些通知，并且它们能被模型看到（如果需要的话）。
             agent.record({"role": "user", "content": notification, "created_at": now()})
             agent.session_event_bus.emit(
                 "worker_notification_drained",
@@ -118,7 +122,8 @@ class Engine:
                     run_started_at,
                 )
                 return
-            yield from self._drain_worker_notification_events()
+            # Drain 时机（主循环中的三个点）
+            yield from self._drain_worker_notification_events()  # 时机1：在每次循环迭代开始，构建 prompt 和调用模型之前，检查是否有通知需要处理
             attempts += 1
             task_state.record_attempt()
             agent.run_store.write_task_state(task_state)
@@ -330,7 +335,7 @@ class Engine:
                         run_started_at,
                     )
                     return
-                continue
+                continue  # 工具执行完成后，回到循环开头，触发时机1的 drain
 
             if kind == "retry":
                 agent.record(
@@ -349,7 +354,7 @@ class Engine:
                 continue
 
             final = (payload or raw).strip()
-            yield from self._drain_worker_notification_events()
+            yield from self._drain_worker_notification_events()   # 时机2：处理模型输出，final 响应之前，再次检查是否有通知需要处理，确保用户能及时看到这些通知
             if agent.runtime_mode == "plan" and not agent.plan_mode.can_finish():
                 notice = agent.plan_mode.final_notice()
                 agent.record(
@@ -419,7 +424,7 @@ class Engine:
             agent.run_store.write_report(
                 task_state, agent.redact_artifact(agent.build_report(task_state))
             )
-            yield from self._drain_worker_notification_events()
+            yield from self._drain_worker_notification_events()  # 时机3：本轮结束前，发出 turn_finished 事件之前，再次检查是否有通知需要处理
             agent.current_turn_id = ""
             agent.current_run_id = ""
             yield {"type": "final", "run_id": task_state.run_id, "content": final}

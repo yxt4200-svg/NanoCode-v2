@@ -64,7 +64,7 @@ class WorkerManager:
         :return: 任务公开信息
         """
         subagent_type = _clean_type(subagent_type)
-        # 计划模式限制：只允许 Explore 类型
+        # Explore和Worker的边界5：计划模式下只允许 Explore 类型的任务
         if self.runtime.runtime_mode == "plan" and subagent_type != "Explore":
             raise ValueError("plan mode only allows Explore agents")
         # 创建任务
@@ -88,7 +88,7 @@ class WorkerManager:
         # 检查任务状态：正在运行则不能继续
         if item.get("status") in {"running", "stopping"}:
             raise ValueError(f"worker is running: {task_id}")
-        # 模式检查：plan 模式只允许 Explore 类型的任务
+        # Explore和Worker的边界5：模式检查：plan 模式只允许 Explore 类型的任务
         if self.runtime.runtime_mode == "plan" and task.subagent_type != "Explore":
             raise ValueError("plan mode only allows Explore agents")
         # 如果是后台模式：创建线程异步执行任务
@@ -296,6 +296,7 @@ def _clean_type(value):
     清理子智能体类型，确保是 worker 或 Explore
     """
     subagent_type = str(value or "worker").strip()
+    # Explore和Worker的边界6：类型校验；确保子智能体类型是 worker 或 Explore其中一个
     if subagent_type not in {"worker", "Explore"}:
         raise ValueError("subagent_type must be worker or Explore")
     return subagent_type

@@ -20,12 +20,14 @@ def run_worker(manager, task, prompt, action):
     manager._save()
     started = time.monotonic()
     try:
-        result = task.runtime.ask(str(prompt or ""))
+        result = task.runtime.ask(str(prompt or ""))  # 执行子代理的模型客户端
         status = "stopped" if task.stop_requested else "completed"
     except Exception as exc:
         result = f"error: worker failed: {exc}"
         status = "failed"
     task_state = getattr(task.runtime, "current_task_state", None)
+
+    # 更新任务状态和结果，并收集工具调用等相关信息
     with manager._lock:
         item.update(
             {
@@ -38,9 +40,11 @@ def run_worker(manager, task, prompt, action):
                 "updated_at": now(),
             }
         )
+    # 放入通知队列
     manager._notifications.put((task.id, render_worker_notification(item)))
     manager.runtime.session_event_bus.emit(
         "worker_finished",
         {"worker_id": task.id, "status": status, "duration_ms": item["duration_ms"]},
     )
+    # 保存任务状态
     manager._save()
