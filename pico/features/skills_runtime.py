@@ -11,12 +11,14 @@ def invoke_skill(agent, name, arguments=""):
     skill = agent.skills.get(str(name).lstrip("/"))
     if not skill:
         raise KeyError(name)
+    # 构建完整的技能 Prompt
     prompt = _skill_prompt(skill, arguments)
     agent.session_event_bus.emit("skill_invoked", _event_payload(skill, arguments, prompt))
     if skill.disable_model_invocation:
         agent.session_event_bus.emit("skill_completed", _event_payload(skill, arguments, prompt, status="prompt_only"))
         return skill.render(arguments)
-    with _model_override(agent, skill.model), _skill_tool_profile(agent, skill):
+    # 执行技能
+       with _model_override(agent, skill.model), _skill_tool_profile(agent, skill):
         answer = _run_fork(agent, skill, prompt) if skill.context == "fork" else agent.ask(prompt)
     agent.session_event_bus.emit("skill_completed", _event_payload(skill, arguments, prompt, status="completed", answer=answer))
     return answer

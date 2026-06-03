@@ -360,6 +360,7 @@ class Pico(RuntimeSecretsMixin, RuntimeCheckpointsMixin):
         return resume_state
 
     def render_checkpoint_text(self):
+        """Checkpoint 信息渲染为文本"""
         checkpoint = self.current_checkpoint()
         if not checkpoint:
             return ""
@@ -706,12 +707,19 @@ class Pico(RuntimeSecretsMixin, RuntimeCheckpointsMixin):
         return payload
 
     def infer_next_step(self, task_state):
+        """
+        根据任务状态推断下一个步骤。
+        """
+        # 如果任务已经完成 → 没有下一步
         if task_state.status == "completed":
             return "No next step recorded."
+        # 如果是因为步数上限暂停的 → 从最新检查点恢复继续任务
         if task_state.stop_reason == "step_limit_reached":
             return "Resume from the latest checkpoint and continue the task."
+        # 如果上一步用了工具 → 在上一个工具执行后（这个工具记录是在执行完之后才记录的）决定下一步动作（调用工具还是生成最终答案）
         if task_state.last_tool:
             return f"Decide the next action after {task_state.last_tool}."
+        # 默认情况 → 从最新检查点继续任务
         return "Continue the task from the latest checkpoint."
 
     def update_memory_after_tool(self, name, args, result):

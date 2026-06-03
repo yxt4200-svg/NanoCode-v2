@@ -56,15 +56,15 @@ class RuntimeCheckpointsMixin:
             "parent_checkpoint_id": current.get("checkpoint_id", "") if current else "",
             "schema_version": CHECKPOINT_SCHEMA_VERSION,
             "created_at": now(),
-            "current_goal": str(user_message),
+            "current_goal": str(user_message),  # 当前目标
             "completed": [task_state.final_answer] if task_state.final_answer else [],
             "excluded": [],
-            "current_blocker": "" if str(task_state.stop_reason or "") in ("", "final_answer_returned") else str(task_state.stop_reason),
-            "next_step": self.infer_next_step(task_state),
-            "key_files": key_files,
-            "freshness": freshness,
+            "current_blocker": "" if str(task_state.stop_reason or "") in ("", "final_answer_returned") else str(task_state.stop_reason),  # 当前障碍
+            "next_step": self.infer_next_step(task_state),  # 下一步建议
+            "key_files": key_files,  # 关键文件列表
+            "freshness": freshness,  # 文件新鲜度
             "summary": f"{trigger}: {clip(str(user_message), 120)}",
-            "runtime_identity": self.current_runtime_identity(),
+            "runtime_identity": self.current_runtime_identity(),  # 当前运行时身份标识
         }
         state["items"][checkpoint_id] = checkpoint
         state["current_id"] = checkpoint_id
