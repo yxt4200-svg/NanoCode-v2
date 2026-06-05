@@ -328,19 +328,17 @@ def run_memory_dependency_experiment(repetitions=3):
     return results
 
 
+# 记忆依赖型任务
 MEMORY_EXPERIMENT_TASKS = [
-    # ========== 第1层：基础能力（原有3类）==========
+    # ========== 第1层：基础能力（每类3个任务）==========
 
-    # 事实查找：能读对吗？
-    {"id": "fact_color", "category": "fact_lookup", "filename": "facts.txt", "fact": "deploy key is red"},
+    # 事实查找（保留3个，删除 fact_color）
     {"id": "fact_api", "category": "fact_lookup", "filename": "settings.txt", "fact": "api base path is /v1/internal"},
     {"id": "fact_budget", "category": "fact_lookup", "filename": "limits.txt", "fact": "default step budget is 6"},
     {"id": "fact_timeout", "category": "fact_lookup", "filename": "runtime.txt",
      "fact": "timeout ceiling is 120 seconds"},
 
-    # 编辑依赖：能改对吗？
-    {"id": "edit_intro", "category": "edit_dependency", "filename": "README.md",
-     "fact": "first bullet is the locked intro line"},
+    # 编辑依赖（保留3个，删除 edit_intro）
     {"id": "edit_token", "category": "edit_dependency", "filename": "sample.txt",
      "fact": "second token is placeholder"},
     {"id": "edit_field", "category": "edit_dependency", "filename": "config.txt",
@@ -348,19 +346,17 @@ MEMORY_EXPERIMENT_TASKS = [
     {"id": "edit_line", "category": "edit_dependency", "filename": "notes.txt",
      "fact": "locked marker is on line three"},
 
-    # 历史参考：能记住吗？
+    # 历史参考（保留3个，删除 history_tool）
     {"id": "history_file", "category": "history_reference", "filename": "history.txt",
      "fact": "deploy fact came from facts.txt"},
     {"id": "history_line", "category": "history_reference", "filename": "history.txt",
      "fact": "benchmark note came from line two"},
     {"id": "history_token", "category": "history_reference", "filename": "history.txt",
      "fact": "placeholder token was beta"},
-    {"id": "history_tool", "category": "history_reference", "filename": "history.txt",
-     "fact": "inspection tool was read_file"},
 
-    # ========== 第2层：进阶能力（新增6类）==========
+    # ========== 第2层：进阶能力（每类3个任务）==========
 
-    # 跨文件推理：能把多个信息串起来吗？
+    # 跨文件推理（3个）
     {"id": "cross_file_auth", "category": "cross_file_reasoning", "filenames": ["auth.txt", "roles.txt"],
      "fact": "admin role has access to api_key from auth.txt"},
     {"id": "cross_file_config", "category": "cross_file_reasoning", "filenames": ["config.txt", "env.txt"],
@@ -368,7 +364,7 @@ MEMORY_EXPERIMENT_TASKS = [
     {"id": "cross_file_workflow", "category": "cross_file_reasoning", "filenames": ["steps.txt", "rules.txt"],
      "fact": "step 3 requires approval from rules.txt condition"},
 
-    # 多步推理：能多步推理吗？
+    # 多步推理（3个）
     {"id": "multi_step_calc", "category": "multi_step_reasoning", "filename": "calculations.txt",
      "fact": "total cost = base * (1 + tax_rate) with base=100 and tax_rate=0.08"},
     {"id": "multi_step_logic", "category": "multi_step_reasoning", "filename": "conditions.txt",
@@ -376,7 +372,7 @@ MEMORY_EXPERIMENT_TASKS = [
     {"id": "multi_step_sequence", "category": "multi_step_reasoning", "filename": "workflow.txt",
      "fact": "step1 -> step2 -> step3 requires all previous steps completed"},
 
-    # 冲突检测：遇到矛盾怎么办？
+    # 冲突检测（3个）
     {"id": "conflict_version", "category": "conflict_detection", "filenames": ["version_old.txt", "version_new.txt"],
      "fact": "version mismatch: old says 1.0, new says 2.0"},
     {"id": "conflict_status", "category": "conflict_detection", "filenames": ["status_a.txt", "status_b.txt"],
@@ -384,7 +380,7 @@ MEMORY_EXPERIMENT_TASKS = [
     {"id": "conflict_config", "category": "conflict_detection", "filenames": ["config_prod.txt", "config_staging.txt"],
      "fact": "config conflict: prod uses port 80, staging uses port 8080"},
 
-    # 否定验证：知道“没有”吗？
+    # 否定验证（3个）
     {"id": "negation_nonexistent", "category": "negation_verification", "filename": "existing.txt",
      "fact": "magic_key does not exist in this file"},
     {"id": "negation_empty", "category": "negation_verification", "filename": "empty.txt",
@@ -392,7 +388,7 @@ MEMORY_EXPERIMENT_TASKS = [
     {"id": "negation_absent", "category": "negation_verification", "filename": "partial.txt",
      "fact": "section_b is not present in this document"},
 
-    # 记忆更新：改主意了怎么办？
+    # 记忆更新（3个）
     {"id": "update_status", "category": "memory_update", "filename": "status.txt",
      "old_fact": "deploy status is pending", "new_fact": "deploy status is completed"},
     {"id": "update_config", "category": "memory_update", "filename": "params.txt", "old_fact": "timeout value is 30",
@@ -400,7 +396,7 @@ MEMORY_EXPERIMENT_TASKS = [
     {"id": "update_version", "category": "memory_update", "filename": "release.txt",
      "old_fact": "current version is 1.0", "new_fact": "current version is 1.1"},
 
-    # 长对话保持：聊了很久还能记住吗？
+    # 长对话保持（3个）
     {"id": "long_context_name", "category": "long_context_retention", "filename": "intro.txt",
      "fact": "project manager name is Alice", "context_depth": 5},
     {"id": "long_context_key", "category": "long_context_retention", "filename": "secrets.txt",
